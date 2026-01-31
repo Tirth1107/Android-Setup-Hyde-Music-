@@ -5,6 +5,7 @@ workflows:
 
     environment:
       node: 22
+      java: 21
 
     scripts:
       - npm install
