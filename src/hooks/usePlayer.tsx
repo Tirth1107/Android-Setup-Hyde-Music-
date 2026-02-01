@@ -65,7 +65,7 @@ class MusicRecommendationEngine {
   private listeningHistory: ListeningEvent[] = [];
   private readonly HISTORY_WINDOW = 50;
   private readonly RECENT_PLAYED_WINDOW = 20;
-  
+
   constructor() {
     this.userProfile = this.initializeProfile();
   }
@@ -85,7 +85,7 @@ class MusicRecommendationEngine {
 
   public recordListeningEvent(event: ListeningEvent): void {
     this.listeningHistory.push(event);
-    
+
     if (this.listeningHistory.length > this.HISTORY_WINDOW) {
       this.listeningHistory.shift();
     }
@@ -96,12 +96,12 @@ class MusicRecommendationEngine {
   private updateTasteProfile(event: ListeningEvent): void {
     const { artist, genre, action, listenDuration, songDuration } = event;
 
-    const completionRatio = listenDuration && songDuration 
-      ? listenDuration / songDuration 
+    const completionRatio = listenDuration && songDuration
+      ? listenDuration / songDuration
       : 1;
 
     const currentArtistScore = this.userProfile.artistPreferences.get(artist) || 0;
-    
+
     switch (action) {
       case 'full_listen':
         this.userProfile.artistPreferences.set(artist, currentArtistScore + 3);
@@ -143,7 +143,7 @@ class MusicRecommendationEngine {
     const recentSkips = this.listeningHistory
       .slice(-10)
       .filter(e => e.action === 'skip').length;
-    
+
     if (recentSkips > 5) {
       this.userProfile.discoveryOpenness = Math.max(0.1, this.userProfile.discoveryOpenness - 0.05);
     } else if (recentSkips < 2) {
@@ -163,7 +163,7 @@ class MusicRecommendationEngine {
       popularitySignal: this.calculatePopularitySignal(candidate),
     };
 
-    const score = 
+    const score =
       reasons.artistSimilarity * 0.30 +
       reasons.genreSimilarity * 0.20 +
       reasons.moodCompatibility * 0.25 +
@@ -183,7 +183,7 @@ class MusicRecommendationEngine {
     }
 
     const artistScore = this.userProfile.artistPreferences.get(candidateArtist) || 0;
-    
+
     if (this.userProfile.favoriteArtists.includes(candidateArtist)) {
       return 90 + artistScore;
     }
@@ -197,7 +197,7 @@ class MusicRecommendationEngine {
 
     const genreScore = this.userProfile.genrePreferences.get(candidate.genre) || 0;
     const maxScore = Math.max(...Array.from(this.userProfile.genrePreferences.values()), 1);
-    
+
     return (genreScore / maxScore) * 100;
   }
 
@@ -215,7 +215,7 @@ class MusicRecommendationEngine {
 
   private calculateNoveltyBonus(candidate: Song): number {
     const artistScore = this.userProfile.artistPreferences.get(candidate.artist) || 0;
-    
+
     if (artistScore === 0) {
       return this.userProfile.discoveryOpenness * 100;
     }
@@ -246,7 +246,7 @@ class MusicRecommendationEngine {
 
   private calculatePopularitySignal(candidate: Song): number {
     const views = candidate.views || 0;
-    
+
     if (views > 10000000) return 20;
     if (views > 1000000) return 15;
     if (views > 100000) return 10;
@@ -261,12 +261,12 @@ class MusicRecommendationEngine {
     const scored = candidates.map(c => this.scoreSong(c, context));
     scored.sort((a, b) => b.score - a.score);
 
-    const familiar = scored.filter(s => 
+    const familiar = scored.filter(s =>
       this.userProfile.favoriteArtists.includes(s.song.artist) ||
       (this.userProfile.artistPreferences.get(s.song.artist) || 0) > 3
     );
 
-    const discovery = scored.filter(s => 
+    const discovery = scored.filter(s =>
       !this.userProfile.favoriteArtists.includes(s.song.artist) &&
       (this.userProfile.artistPreferences.get(s.song.artist) || 0) <= 3
     );
@@ -399,10 +399,10 @@ const DesktopFullScreenPlayer = ({
       className="hidden md:flex fixed inset-0 z-[200] flex-col overflow-hidden bg-zinc-950"
     >
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        <img 
-          src={currentTrack.coverUrl || currentTrack.image} 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover opacity-30 blur-[100px] scale-110" 
+        <img
+          src={currentTrack.coverUrl || currentTrack.image}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-30 blur-[100px] scale-110"
         />
         <div className="absolute inset-0 bg-black/40 backdrop-blur-3xl" />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
@@ -416,8 +416,8 @@ const DesktopFullScreenPlayer = ({
           </span>
           <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/80">Now Playing</span>
         </div>
-        <button 
-          onClick={onClose} 
+        <button
+          onClick={onClose}
           className="p-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-white backdrop-blur-md transition-all hover:scale-105 hover:rotate-90"
         >
           <Minimize2 className="w-5 h-5" />
@@ -444,7 +444,7 @@ const DesktopFullScreenPlayer = ({
               </h2>
             </div>
             <div className="mt-2 shrink-0">
-               <TrackActionMenu song={currentTrack} direction="down" />
+              <TrackActionMenu song={currentTrack} direction="down" />
             </div>
           </div>
 
@@ -473,13 +473,13 @@ const DesktopFullScreenPlayer = ({
             <button onClick={onToggleShuffle} className={`p-2 transition-all hover:scale-110 ${isShuffled ? 'text-emerald-400' : 'text-white/40 hover:text-white'}`}>
               <Shuffle className="w-5 h-5" />
             </button>
-               
+
             <div className="flex items-center gap-6">
               <button onClick={onPrev} className="p-3 bg-white/5 hover:bg-white/10 rounded-full border border-white/5 transition-all active:scale-95 hover:scale-105">
                 <SkipBack className="w-6 h-6 fill-white text-white" />
               </button>
-              <button 
-                onClick={onTogglePlay} 
+              <button
+                onClick={onTogglePlay}
                 className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black shadow-lg hover:scale-105 active:scale-95 transition-all"
               >
                 {isPlaying ? <Pause className="w-7 h-7 fill-current" /> : <Play className="w-7 h-7 fill-current ml-1" />}
@@ -574,7 +574,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (!state.isPlaying && state.currentSong && state.currentTime > 0) {
       const completionRatio = state.currentTime / (state.duration || 1);
-      
+
       if (completionRatio > 0.9) {
         recommendationEngine.current.recordListeningEvent({
           songId: state.currentSong.id,
@@ -604,7 +604,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
           console.log("🎵 Intelligent Auto-Queue: Analyzing listening patterns...");
 
           const recentHistory = queue.slice(-10);
-          
+
           const sessionContext: SessionContext = {
             currentSong,
             queue,
@@ -621,13 +621,13 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
           const searchQuery = strategy === 'focus_mode'
             ? `${currentSong.artist} best songs`
             : strategy === 'discovery_mode'
-            ? `similar to ${currentSong.artist} new artists`
-            : `${currentSong.artist} radio`;
+              ? `similar to ${currentSong.artist} new artists`
+              : `${currentSong.artist} radio`;
 
           let candidates = await searchMusic(searchQuery);
 
-          candidates = candidates.filter(c => 
-            !queue.some(q => q.id === c.id) && 
+          candidates = candidates.filter(c =>
+            !queue.some(q => q.id === c.id) &&
             c.id !== currentSong.id &&
             !isTitleTooSimilar(currentSong.title, c.title)
           );
@@ -664,12 +664,51 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     handleIntelligentAutoQueue();
   }, [state.currentSong, state.queue, skipCount, repeatCount]);
 
+  // --- MOBILE BACKGROUND PLAYBACK HACK ---
+  // A silent audio track is played alongside the YouTube video.
+  // This "tricks" iOS/Android into thinking a real music track is playing,
+  // preventing them from suspending the YouTube IFrame when backgrounded.
+  const silentAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    // 1-second silent MP3
+    const SILENT_MP3 = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV6urq6urq6urq6urq6urq6urq6urq6urq6v////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAASAAAAAA//OEMAAAAAAA';
+
+    if (!silentAudioRef.current) {
+      const audio = new Audio(SILENT_MP3);
+      audio.loop = true;
+      audio.volume = 0; // Silent
+      audio.preload = 'auto';
+      silentAudioRef.current = audio;
+    }
+  }, []);
+
+  // Sync Silent Audio with Player State
+  useEffect(() => {
+    const audio = silentAudioRef.current;
+    if (!audio) return;
+
+    if (state.isPlaying) {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          // Auto-play policy might block this until user interaction.
+          // Usually handled by the main play button click, but good to catch.
+          console.warn("Silent audio play blocked:", error);
+        });
+      }
+    } else {
+      audio.pause();
+    }
+  }, [state.isPlaying]);
+
   // YouTube API
   useEffect(() => {
     if (!document.getElementById('youtube-player-hidden')) {
       const playerDiv = document.createElement('div');
       playerDiv.id = 'youtube-player-hidden';
-      playerDiv.style.cssText = 'position: absolute; top: -9999px; left: -9999px; visibility: hidden;';
+      // Use opacity 0 instead of visibility: hidden to potentially avoid some background execution restrictions
+      playerDiv.style.cssText = 'position: absolute; top: -9999px; left: -9999px; opacity: 0; pointer-events: none; z-index: -1;';
       document.body.appendChild(playerDiv);
     }
 
@@ -699,7 +738,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
               setState(prev => ({ ...prev, isPlaying: false }));
             } else if (event.data === window.YT.PlayerState.ENDED) {
               setState(prev => ({ ...prev, isPlaying: false }));
-              nextSong(); 
+              nextSong();
             }
           },
           onError: (e: any) => console.error("YT Error:", e)
@@ -825,7 +864,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 
   const nextSong = useCallback(() => {
     const { currentSong, currentTime, duration } = state;
-    
+
     if (currentSong && currentTime < duration * 0.7) {
       recommendationEngine.current.recordListeningEvent({
         songId: currentSong.id,
@@ -949,6 +988,58 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     return () => clearInterval(interval);
   }, [state.isPlaying]);
 
+  // ============================================================================
+  // MEDIA SESSION API (Mobile Background Playback)
+  // ============================================================================
+  useEffect(() => {
+    if ('mediaSession' in navigator && state.currentSong) {
+      const { currentSong, isPlaying } = state;
+
+      // Update metadata
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentSong.title,
+        artist: currentSong.artist,
+        artwork: [
+          { src: currentSong.coverUrl || currentSong.image || '', sizes: '96x96', type: 'image/jpeg' },
+          { src: currentSong.coverUrl || currentSong.image || '', sizes: '128x128', type: 'image/jpeg' },
+          { src: currentSong.coverUrl || currentSong.image || '', sizes: '192x192', type: 'image/jpeg' },
+          { src: currentSong.coverUrl || currentSong.image || '', sizes: '256x256', type: 'image/jpeg' },
+          { src: currentSong.coverUrl || currentSong.image || '', sizes: '384x384', type: 'image/jpeg' },
+          { src: currentSong.coverUrl || currentSong.image || '', sizes: '512x512', type: 'image/jpeg' },
+        ]
+      });
+
+      // Update playback state
+      navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+
+      // Set action handlers
+      // We use the refs/wrappers to ensure we always use the latest state functions without re-binding too often,
+      // though the dependency on `state.currentSong` above will rebuild this when song changes anyway.
+
+      navigator.mediaSession.setActionHandler('play', () => togglePlay());
+      navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+      navigator.mediaSession.setActionHandler('previoustrack', () => prevSong());
+      navigator.mediaSession.setActionHandler('nexttrack', () => nextSong());
+
+      navigator.mediaSession.setActionHandler('seekto', (details) => {
+        if (details.seekTime && details.fastSeek) {
+          // Fast seek if supported, or just normal seek
+        }
+        if (details.seekTime !== undefined) {
+          const percent = (details.seekTime / (state.duration || 1)) * 100;
+          seekTo(percent);
+        }
+      });
+
+      // Clean up isn't strictly necessary for metadata as it gets overwritten, 
+      // but good practice might be clearing handlers if component unmounts.
+      return () => {
+        // Optional: Clear handlers if needed, or let them linger until overwritten
+        // navigator.mediaSession.setActionHandler('play', null);
+      };
+    }
+  }, [state.currentSong, state.isPlaying, state.duration, togglePlay, prevSong, nextSong, seekTo]);
+
   return (
     <PlayerContext.Provider
       value={{
@@ -1017,7 +1108,7 @@ const Player: React.FC = () => {
         <div className="flex items-center w-[30%] space-x-4 group">
           <div className="relative flex-shrink-0 cursor-pointer hover:scale-105 transition-transform duration-300" onClick={() => setIsFullScreen(true)}>
             <motion.img layoutId="desktop-cover" src={currentSong.coverUrl || currentSong.image} className="w-12 h-12 rounded-xl object-cover shadow-lg" />
-             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity flex items-center justify-center"><Maximize2 className="w-5 h-5 text-white" /></div>
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity flex items-center justify-center"><Maximize2 className="w-5 h-5 text-white" /></div>
           </div>
           <div className="overflow-hidden">
             <h4 onClick={() => setIsFullScreen(true)} className="text-sm font-bold truncate text-white cursor-pointer hover:underline decoration-emerald-500 decoration-2 underline-offset-4">{currentSong.title}</h4>
@@ -1064,7 +1155,7 @@ const Player: React.FC = () => {
           <motion.div initial={{ y: 150 }} animate={{ y: -64 }} exit={{ y: 150 }} onClick={() => setIsMobileExpanded(true)} className="md:hidden fixed bottom-0 left-2 right-2 h-14 bg-zinc-900/95 backdrop-blur-2xl border border-white/10 rounded-xl flex items-center px-3 space-x-3 z-[90] shadow-2xl">
             <img src={currentSong.coverUrl || currentSong.image} className="w-10 h-10 rounded-lg shadow-md object-cover" />
             <div className="flex-1 min-w-0"><h4 className="text-sm font-bold truncate text-white">{currentSong.title}</h4><p className="text-xs text-zinc-400 truncate">{currentSong.artist}</p></div>
-            <div className="flex items-center gap-2"><button onClick={(e) => {e.stopPropagation(); togglePlay()}} className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black">{isPlaying ? <Pause className="w-4 h-4 fill-current"/> : <Play className="w-4 h-4 fill-current ml-0.5"/>}</button></div>
+            <div className="flex items-center gap-2"><button onClick={(e) => { e.stopPropagation(); togglePlay() }} className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black">{isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}</button></div>
             <div className="absolute bottom-0 left-3 right-3 h-[2px] bg-white/10 rounded-full overflow-hidden"><div className="h-full bg-emerald-500" style={{ width: `${progress}%` }} /></div>
           </motion.div>
         )}
@@ -1074,7 +1165,7 @@ const Player: React.FC = () => {
       <AnimatePresence>
         {isMobileExpanded && (
           <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className="md:hidden fixed inset-0 z-[200] flex flex-col bg-zinc-950">
-             <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10"><img src={currentSong.coverUrl || currentSong.image} className="absolute inset-0 w-full h-full object-cover opacity-30 blur-[80px]" /><div className="absolute inset-0 bg-black/50" /></div>
+            <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10"><img src={currentSong.coverUrl || currentSong.image} className="absolute inset-0 w-full h-full object-cover opacity-30 blur-[80px]" /><div className="absolute inset-0 bg-black/50" /></div>
             <div className="flex items-center justify-between p-6 pt-12"><button onClick={() => setIsMobileExpanded(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-white/10"><ChevronDown className="w-5 h-5 text-white" /></button><span className="text-[10px] uppercase tracking-widest text-white/60 font-bold">Now Playing</span><TrackActionMenu song={currentSong} direction="down" /></div>
             <div className="flex-1 flex items-center justify-center p-6"><motion.div layoutId="track-image" className="w-full max-w-[300px] aspect-square shadow-2xl rounded-2xl overflow-hidden border border-white/10"><img src={currentSong.coverUrl || currentSong.image} className="w-full h-full object-cover" /></motion.div></div>
             <div className="px-8 pb-12 space-y-6">
@@ -1197,19 +1288,19 @@ export const TasteProfileDashboard: React.FC = () => {
               </div>
               <div className="text-xs text-zinc-500 uppercase tracking-wider mt-1">
                 {discoveryLevel < 25 ? 'Conservative' :
-                 discoveryLevel < 40 ? 'Balanced' :
-                 discoveryLevel < 60 ? 'Adventurous' : 'Explorer'}
+                  discoveryLevel < 40 ? 'Balanced' :
+                    discoveryLevel < 60 ? 'Adventurous' : 'Explorer'}
               </div>
             </div>
           </div>
-          
+
           <div className="relative h-3 bg-zinc-800 rounded-full overflow-hidden">
             <div
               className="absolute left-0 top-0 h-full bg-gradient-to-r from-emerald-500 to-cyan-500 transition-all duration-1000"
               style={{ width: `${discoveryLevel}%` }}
             />
           </div>
-          
+
           <div className="mt-4 text-sm text-zinc-400">
             {discoveryLevel < 25 && "You prefer familiar favorites. We'll keep recommendations close to what you know."}
             {discoveryLevel >= 25 && discoveryLevel < 40 && "You enjoy a healthy mix of old and new. Perfect balance!"}
@@ -1224,12 +1315,12 @@ export const TasteProfileDashboard: React.FC = () => {
               <TrendingUp className="w-5 h-5 text-emerald-400" />
               <h2 className="text-xl font-bold">Top Artists</h2>
             </div>
-            
+
             <div className="space-y-3">
               {topArtists.map(([artist, score], index) => {
                 const maxScore = topArtists[0][1];
                 const percentage = (score / maxScore) * 100;
-                
+
                 return (
                   <div key={artist} className="group">
                     <div className="flex items-center justify-between mb-1.5">
@@ -1262,13 +1353,13 @@ export const TasteProfileDashboard: React.FC = () => {
               <BarChart3 className="w-5 h-5 text-cyan-400" />
               <h2 className="text-xl font-bold">Favorite Genres</h2>
             </div>
-            
+
             {topGenres.length > 0 ? (
               <div className="space-y-4">
                 {topGenres.map(([genre, score], index) => {
                   const maxScore = topGenres[0][1];
                   const percentage = (score / maxScore) * 100;
-                  
+
                   return (
                     <div key={genre} className="group">
                       <div className="flex items-center justify-between mb-2">
@@ -1303,7 +1394,7 @@ export const TasteProfileDashboard: React.FC = () => {
             <Shuffle className="w-5 h-5 text-purple-400" />
             <h2 className="text-xl font-bold">Recent Activity</h2>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard
               label="Songs Played"

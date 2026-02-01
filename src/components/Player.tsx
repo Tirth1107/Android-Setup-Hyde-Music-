@@ -31,10 +31,10 @@ const DesktopFullScreenPlayer = ({
     >
       {/* --- IMMERSIVE BACKGROUND --- */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        <img 
-          src={currentTrack.coverUrl || currentTrack.image} 
-          alt="" 
-          className="absolute inset-0 w-full h-full object-cover opacity-30 blur-[100px] scale-110" 
+        <img
+          src={currentTrack.coverUrl || currentTrack.image}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-30 blur-[100px] scale-110"
         />
         <div className="absolute inset-0 bg-black/40 backdrop-blur-3xl" />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
@@ -49,8 +49,8 @@ const DesktopFullScreenPlayer = ({
           </span>
           <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-white/80">Now Playing</span>
         </div>
-        <button 
-          onClick={onClose} 
+        <button
+          onClick={onClose}
           className="p-2 bg-white/5 hover:bg-white/10 border border-white/5 rounded-full text-white backdrop-blur-md transition-all hover:scale-105 hover:rotate-90"
         >
           <Minimize2 className="w-5 h-5" />
@@ -59,7 +59,7 @@ const DesktopFullScreenPlayer = ({
 
       {/* --- MAIN CONTENT --- */}
       <div className="flex-1 flex w-full max-w-5xl mx-auto px-8 pb-12 items-center justify-center space-x-16">
-        
+
         {/* Cover Art (Fixed Normal Size: 320px) */}
         <motion.div
           layoutId="desktop-cover"
@@ -72,7 +72,7 @@ const DesktopFullScreenPlayer = ({
 
         {/* Info & Controls */}
         <div className="flex-1 flex flex-col justify-center space-y-8 max-w-xl">
-          
+
           {/* Titles & Action Menu */}
           <div className="flex justify-between items-start">
             <div className="space-y-2 pr-4">
@@ -85,7 +85,7 @@ const DesktopFullScreenPlayer = ({
             </div>
             {/* Action Menu (Accessible) */}
             <div className="mt-2 shrink-0">
-               <TrackActionMenu song={currentTrack} direction="down" />
+              <TrackActionMenu song={currentTrack} direction="down" />
             </div>
           </div>
 
@@ -116,13 +116,13 @@ const DesktopFullScreenPlayer = ({
             <button onClick={onToggleShuffle} className={`p-2 transition-all hover:scale-110 ${isShuffled ? 'text-emerald-400' : 'text-white/40 hover:text-white'}`}>
               <Shuffle className="w-5 h-5" />
             </button>
-               
+
             <div className="flex items-center gap-6">
               <button onClick={onPrev} className="p-3 bg-white/5 hover:bg-white/10 rounded-full border border-white/5 transition-all active:scale-95 hover:scale-105">
                 <SkipBack className="w-6 h-6 fill-white text-white" />
               </button>
-              <button 
-                onClick={onTogglePlay} 
+              <button
+                onClick={onTogglePlay}
                 className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black shadow-lg hover:scale-105 active:scale-95 transition-all"
               >
                 {isPlaying ? <Pause className="w-7 h-7 fill-current" /> : <Play className="w-7 h-7 fill-current ml-1" />}
@@ -199,7 +199,7 @@ const Player: React.FC = () => {
       {/* ==============================================
           DESKTOP MINI PLAYER (Floating Island)
       ============================================== */}
-      <motion.div 
+      <motion.div
         initial={{ y: 100 }}
         animate={{ y: 0 }}
         className="hidden md:flex fixed bottom-6 left-6 right-6 h-20 bg-zinc-900/90 backdrop-blur-2xl border border-white/10 rounded-[2rem] px-8 items-center justify-between z-[100] shadow-[0_8px_32px_rgba(0,0,0,0.5)] transition-all hover:bg-zinc-900/95"
@@ -213,9 +213,9 @@ const Player: React.FC = () => {
               alt={currentTrack.title}
               className="w-12 h-12 rounded-xl object-cover shadow-lg"
             />
-             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity flex items-center justify-center">
-                <Maximize2 className="w-5 h-5 text-white" />
-             </div>
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 rounded-xl transition-opacity flex items-center justify-center">
+              <Maximize2 className="w-5 h-5 text-white" />
+            </div>
           </div>
           <div className="overflow-hidden">
             <h4 onClick={() => setIsFullScreen(true)} className="text-sm font-bold truncate text-white cursor-pointer hover:underline decoration-emerald-500 decoration-2 underline-offset-4">
@@ -224,7 +224,7 @@ const Player: React.FC = () => {
             <p className="text-xs text-zinc-400 truncate font-medium">{currentTrack.artist}</p>
           </div>
           <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-             <TrackActionMenu song={currentTrack} direction="up" align="left" />
+            <TrackActionMenu song={currentTrack} direction="up" align="left" />
           </div>
         </div>
 
@@ -311,12 +311,12 @@ const Player: React.FC = () => {
               <p className="text-xs text-zinc-400 truncate">{currentTrack.artist}</p>
             </div>
             <div className="flex items-center gap-2">
-               <button onClick={(e) => { e.stopPropagation(); togglePlay(); }} className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black">
-                 {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
-               </button>
+              <button onClick={(e) => { e.stopPropagation(); togglePlay(); }} className="w-8 h-8 bg-white rounded-full flex items-center justify-center text-black">
+                {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+              </button>
             </div>
             <div className="absolute bottom-0 left-3 right-3 h-[2px] bg-white/10 rounded-full overflow-hidden">
-               <div className="h-full bg-emerald-500" style={{ width: `${(progress / (duration || 1)) * 100}%` }} />
+              <div className="h-full bg-emerald-500" style={{ width: `${(progress / (duration || 1)) * 100}%` }} />
             </div>
           </motion.div>
         )}
@@ -334,11 +334,11 @@ const Player: React.FC = () => {
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className="md:hidden fixed inset-0 z-[200] flex flex-col bg-zinc-950"
           >
-             {/* Background Blur */}
-             <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-                <img src={currentTrack.coverUrl || currentTrack.image} className="absolute inset-0 w-full h-full object-cover opacity-30 blur-[80px]" />
-                <div className="absolute inset-0 bg-black/50" />
-             </div>
+            {/* Background Blur */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+              <img src={currentTrack.coverUrl || currentTrack.image} className="absolute inset-0 w-full h-full object-cover opacity-30 blur-[80px]" />
+              <div className="absolute inset-0 bg-black/50" />
+            </div>
 
             {/* Header */}
             <div className="flex items-center justify-between p-6 pt-12">
@@ -382,25 +382,25 @@ const Player: React.FC = () => {
               <div className="flex items-center justify-between px-2">
                 <button onClick={toggleShuffle} className={`${isShuffled ? 'text-emerald-400' : 'text-zinc-500'}`}><Shuffle className="w-5 h-5" /></button>
                 <div className="flex items-center gap-6">
-                   <button onClick={prevSong}><SkipBack className="w-8 h-8 fill-white text-white" /></button>
-                   <button onClick={togglePlay} className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black shadow-xl active:scale-95 transition-transform">
-                     {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-1" />}
-                   </button>
-                   <button onClick={nextSong}><SkipForward className="w-8 h-8 fill-white text-white" /></button>
+                  <button onClick={prevSong}><SkipBack className="w-8 h-8 fill-white text-white" /></button>
+                  <button onClick={togglePlay} className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black shadow-xl active:scale-95 transition-transform">
+                    {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-1" />}
+                  </button>
+                  <button onClick={nextSong}><SkipForward className="w-8 h-8 fill-white text-white" /></button>
                 </div>
                 <button onClick={toggleRepeat} className={`${repeatMode !== 'off' ? 'text-emerald-400' : 'text-zinc-500'}`}><Repeat className="w-5 h-5" /></button>
               </div>
-              
+
               {/* Bottom Accessories */}
               <div className="flex justify-between items-center px-4 pt-2">
-                 <div className="flex items-center gap-2 text-zinc-500 text-xs font-bold uppercase tracking-wider">
-                    <Volume2 className="w-4 h-4" />
-                    <span>{volume}%</span>
-                 </div>
-                 <button className="text-zinc-500 hover:text-white flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
-                    <ListMusic className="w-4 h-4" />
-                    <span>Lyrics</span>
-                 </button>
+                <div className="flex items-center gap-2 text-zinc-500 text-xs font-bold uppercase tracking-wider">
+                  <Volume2 className="w-4 h-4" />
+                  <span>{volume}%</span>
+                </div>
+                <button className="text-zinc-500 hover:text-white flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+                  <ListMusic className="w-4 h-4" />
+                  <span>Lyrics</span>
+                </button>
               </div>
             </div>
           </motion.div>
