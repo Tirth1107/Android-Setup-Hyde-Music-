@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.0.2",
+    "@capgo/native-audio": "latest",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",

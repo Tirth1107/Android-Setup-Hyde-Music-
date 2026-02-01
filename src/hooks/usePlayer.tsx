@@ -10,6 +10,8 @@ import { addToHistory, updateNowPlaying, getNowPlaying } from '@/api/db';
 import { searchMusic } from '@/api/client';
 import { useAuth } from './useAuth';
 import TrackActionMenu from '../components/TrackActionMenu';
+import { NativeAudioService } from '../services/NativeAudioService';
+import { getStreamUrl } from '@/api/client';
 
 // ============================================================================
 // MUSIC RECOMMENDATION INTELLIGENCE ENGINE
@@ -664,43 +666,7 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     handleIntelligentAutoQueue();
   }, [state.currentSong, state.queue, skipCount, repeatCount]);
 
-  // --- MOBILE BACKGROUND PLAYBACK HACK ---
-  // A silent audio track is played alongside the YouTube video.
-  // This "tricks" iOS/Android into thinking a real music track is playing,
-  // preventing them from suspending the YouTube IFrame when backgrounded.
-  const silentAudioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    // 1-second silent MP3
-    const SILENT_MP3 = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//OEAAAAAAAAAAAAAAAAAAAAAAAASW5mbwAAAA8AAAAEAAABIADAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDV1dXV1dXV1dXV1dXV1dXV1dXV1dXV1dXV6urq6urq6urq6urq6urq6urq6urq6urq6v////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAAASAAAAAA//OEMAAAAAAA';
-
-    if (!silentAudioRef.current) {
-      const audio = new Audio(SILENT_MP3);
-      audio.loop = true;
-      audio.volume = 0; // Silent
-      audio.preload = 'auto';
-      silentAudioRef.current = audio;
-    }
-  }, []);
-
-  // Sync Silent Audio with Player State
-  useEffect(() => {
-    const audio = silentAudioRef.current;
-    if (!audio) return;
-
-    if (state.isPlaying) {
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          // Auto-play policy might block this until user interaction.
-          // Usually handled by the main play button click, but good to catch.
-          console.warn("Silent audio play blocked:", error);
-        });
-      }
-    } else {
-      audio.pause();
-    }
-  }, [state.isPlaying]);
+  // --- MOBILE BACKGROUND PLAYBACK HACK REMOVED ---
 
   // YouTube API
   useEffect(() => {
@@ -769,8 +735,54 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
   }, [state.volume]);
 
   // Actions
-  const playSong = useCallback((song: Song) => {
+  const playSong = useCallback(async (song: Song) => {
     const videoId = getVideoId(song);
+
+    // --- NATIVE PLATFORM LOGIC ---
+    if (NativeAudioService.isNative) {
+      try {
+        // Get stream URL from backend
+        const streamUrl = await getStreamUrl(song.id);
+        if (streamUrl) {
+          // Play via native plugin
+          await NativeAudioService.play(song, streamUrl);
+
+          // Track history/stats
+          recommendationEngine.current.recordListeningEvent({
+            songId: song.id,
+            artist: song.artist,
+            genre: (song as any).genre,
+            action: 'play',
+            timestamp: Date.now(),
+          });
+
+          if (user) {
+            addToHistory(user.id, song);
+            updateNowPlaying(user.id, song, true, 0);
+          }
+
+          // Update Local State
+          setState(prev => {
+            const queueHasSong = prev.queue.some(s => s.id === song.id);
+            return {
+              ...prev,
+              currentSong: song,
+              isPlaying: true,
+              progress: 0,
+              currentTime: 0,
+              queue: queueHasSong ? prev.queue : [...prev.queue, song]
+            };
+          });
+          return; // Exit, don't run web logic
+        } else {
+          console.error("Failed to get stream URL for native playback");
+        }
+      } catch (e) {
+        console.error("Native play failed", e);
+      }
+    }
+
+    // --- WEB / FALLBACK LOGIC ---
     if (playerRef.current && playerReady.current) {
       if (state.currentSong?.id === song.id) playerRef.current.playVideo();
       else playerRef.current.loadVideoById(videoId);
@@ -822,21 +834,46 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     }));
   }, [user]);
 
-  const pauseSong = useCallback(() => {
-    if (playerRef.current && playerReady.current) playerRef.current.pauseVideo();
+  const pauseSong = useCallback(async () => {
+    if (NativeAudioService.isNative) {
+      await NativeAudioService.pause();
+    } else if (playerRef.current && playerReady.current) {
+      playerRef.current.pauseVideo();
+    }
+
     setState(prev => {
       if (user && prev.currentSong) updateNowPlaying(user.id, prev.currentSong, false, prev.currentTime);
       return { ...prev, isPlaying: false };
     });
   }, [user]);
 
+  const resumeSong = useCallback(async () => {
+    if (NativeAudioService.isNative) {
+      await NativeAudioService.resume();
+      setState(prev => ({ ...prev, isPlaying: true }));
+      return;
+    }
+
+    if (playerRef.current && playerReady.current) playerRef.current.playVideo();
+    setState(prev => ({ ...prev, isPlaying: true }));
+  }, []);
+
   const togglePlay = useCallback(() => {
     if (state.isPlaying) pauseSong();
-    else {
-      if (playerRef.current && playerReady.current) playerRef.current.playVideo();
-      setState(prev => ({ ...prev, isPlaying: true }));
-    }
-  }, [state.isPlaying, pauseSong]);
+    else resumeSong();
+  }, [state.isPlaying, pauseSong, resumeSong]);
+
+  // ... (getNextTrack remains same, skipping re-definition to keep diff small, but need to be careful with replace range)
+  // Wait, I can't skip lines in ReplacementContent if I'm replacing a block.
+  // I must include getNextTrack and others if they fall in the range. 
+  // Let me adjust the range to avoiding re-writing big functions like getNextTrack/nextSong/prevSong if possible.
+  // pauseSong is 838-844. togglePlay is 846-852.
+  // getNextTrack is 854.
+  // nextSong is 878.
+  // seekTo is 936. setVolume is 951.
+  // They are separated. It's better to do multiple replaces or one giant one.
+  // I'll do multiple replaces to be safer and avoid rewriting 100 lines of unrelated logic.
+
 
   const getNextTrack = (direction: 'next' | 'prev') => {
     const { queue, currentSong, isShuffled, repeatMode } = state;
@@ -920,7 +957,19 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
     }));
   }, [state, user]);
 
-  const seekTo = useCallback((progress: number) => {
+  const seekTo = useCallback(async (progress: number) => {
+    const time = (progress / 100) * (state.duration || 1);
+
+    if (NativeAudioService.isNative) {
+      await NativeAudioService.seek(time);
+      setState(prev => {
+        const newTime = time;
+        if (user && prev.currentSong) updateNowPlaying(user.id, prev.currentSong, prev.isPlaying, newTime);
+        return { ...prev, currentTime: newTime, progress };
+      });
+      return;
+    }
+
     if (playerRef.current && playerReady.current) {
       const duration = playerRef.current.getDuration();
       if (duration) {
@@ -933,11 +982,17 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
       if (user && prev.currentSong) updateNowPlaying(user.id, prev.currentSong, prev.isPlaying, newTime);
       return { ...prev, progress, currentTime: newTime };
     });
-  }, [user]);
+  }, [user, state.duration]); // Added state.duration dep
 
-  const setVolume = useCallback((volume: number) => {
+  const setVolume = useCallback(async (volume: number) => {
+    if (NativeAudioService.isNative) {
+      await NativeAudioService.setVolume(volume);
+    } else if (playerRef.current && playerReady.current) {
+      playerRef.current.setVolume(volume);
+    }
     setState(prev => ({ ...prev, volume }));
   }, []);
+
 
   const toggleShuffle = useCallback(() => {
     setState(prev => ({ ...prev, isShuffled: !prev.isShuffled }));

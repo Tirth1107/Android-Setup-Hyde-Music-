@@ -73,6 +73,29 @@ export const searchMusic = async (query: string): Promise<Song[]> => {
     }
 };
 
+export const getStreamUrl = async (songId: string): Promise<string | null> => {
+    try {
+        const videoId = songId.replace('yt_', '');
+        // Use existing /download endpoint which returns { success: true, file: "..." }
+        const response = await apiFetch(`/download`, {
+            method: 'POST',
+            body: JSON.stringify({ youtube_id: videoId })
+        });
+
+        if (!response.ok) return null;
+        const data = await response.json();
+
+        if (data.file) {
+            const baseUrl = (import.meta.env.VITE_BACKEND_URL || "https://hydemusic.onrender.com").replace(/\/$/, '');
+            return `${baseUrl}/downloads/${data.file}`;
+        }
+        return null;
+    } catch (e) {
+        console.error("Failed to get stream url", e);
+        return null;
+    }
+};
+
 export const getSuggestions = async (query: string): Promise<string[]> => {
     try {
         const response = await apiFetch(`/suggestions?q=${encodeURIComponent(query)}`);

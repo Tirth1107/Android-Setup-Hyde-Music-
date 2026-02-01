@@ -42,6 +42,14 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <service android:name="us.mediagrid.capacitorjs.plugins.nativeaudio.AudioPlayerService"
+            android:foregroundServiceType="mediaPlayback"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>
