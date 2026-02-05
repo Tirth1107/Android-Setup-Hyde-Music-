@@ -1,6 +1,0 @@
-flask
-gunicorn
-yt-dlp
-flask-cors
-requests
-python-dotenv
