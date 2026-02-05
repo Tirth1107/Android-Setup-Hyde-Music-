@@ -7,52 +7,49 @@ import { Song } from '../types/music';
 export const NativeAudioService = {
     isNative: Capacitor.isNativePlatform(),
 
+    async initialize() {
+        if (!this.isNative) return;
+        try {
+            await NativeAudio.configure({
+                focus: true,
+                background: true,
+                showNotification: true,
+                fade: true
+            });
+        } catch (e) {
+            console.error("Native Audio Init Error:", e);
+        }
+    },
+
     async play(song: Song, audioUrl: string) {
         if (!this.isNative) return;
 
         try {
-            // Ensure any existing audio is stopped/unloaded if necessary
-            // For this plugin, typically play handles it, or we might want to stop first
-            // But usually sending a new track ID handles it.
-
-            // NativeAudio plugin expects an object with assetId, assetPath, etc.
-            // But @capgo/capacitor-native-audio supports streaming from URL.
-            // We use 'configure' or direct 'play' depending on API.
-            // Checking plugin docs (simulated):
-            // await NativeAudio.play({ assetId: 'currentTrack', path: audioUrl });
-
-            // We will use a fixed assetId 'currentTrack' so we only play one song at a time.
-            // First, try to unload previous if exists? 
-            // Safe approach: unload -> preload -> play, or just play if supported.
-
-            // @capgo/capacitor-native-audio typically supports:
-            // NativeAudio.preload({ assetId: "fire", assetPath: "fire.mp3", audioChannelNum: 1, isUrl: true });
-            // NativeAudio.play({ assetId: "fire" });
-
             const assetId = 'currentSong';
 
+            // Unload previous if exists
             try {
                 await NativeAudio.unload({ assetId });
-            } catch (e) {
-                // Ignore error if not loaded
-            }
+            } catch (e) { /* Ignore */ }
 
+            // Preload with metadata for notification
             await NativeAudio.preload({
                 assetId: assetId,
                 assetPath: audioUrl,
                 audioChannelNum: 1,
-                isUrl: true
+                isUrl: true,
+                notificationMetadata: {
+                    title: song.title,
+                    artist: song.artist,
+                    album: (song as any).album || 'Single',
+                    artworkUrl: song.coverUrl || song.image
+                }
             });
-
-            // Update metadata for lockscreen (if supported by plugin, otherwise handled elsewhere)
-            // This plugin might not support metadata directly in 'play'. 
-            // We rely on the service configuration in AndroidManifest for basic controls.
 
             await NativeAudio.play({
                 assetId: assetId,
             });
 
-            // Set volume to 1.0 (max) by default, managed by global volume
             await NativeAudio.setVolume({
                 assetId: assetId,
                 volume: 1.0
@@ -88,7 +85,6 @@ export const NativeAudioService = {
     async setVolume(volume: number) {
         if (!this.isNative) return;
         try {
-            // Volume is 0.0 to 1.0
             const vol = Math.max(0, Math.min(1, volume / 100));
             await NativeAudio.setVolume({
                 assetId: 'currentSong',
@@ -100,7 +96,6 @@ export const NativeAudioService = {
     async seek(timeSeconds: number) {
         if (!this.isNative) return;
         try {
-            // Plugin uses seconds or milliseconds? Usually seconds for 'setCurrentTime'
             await NativeAudio.setCurrentTime({
                 assetId: 'currentSong',
                 time: timeSeconds

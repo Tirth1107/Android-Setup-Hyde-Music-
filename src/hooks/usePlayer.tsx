@@ -552,6 +552,11 @@ export const PlayerProvider = ({ children }: { children: ReactNode }) => {
 
   // Initial Fetch
   useEffect(() => {
+    // Initialize Native Audio Service
+    if (NativeAudioService.isNative) {
+      NativeAudioService.initialize();
+    }
+
     if (!user) return;
     const fetchLastState = async () => {
       try {
